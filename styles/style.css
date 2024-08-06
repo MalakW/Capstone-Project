@@ -1,0 +1,60 @@
+.stButton > button {
+    background-color: #840434;
+    border: none;
+    color: #ffffff;
+    font-size: 24px;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    position: relative;
+    top: 75px;  
+}
+
+.stButton > button:hover {
+    background-color: transparent;
+    color: #840434;
+}
+
+/* div.stButton > button#predict_stock {
+    background-color: #840434;
+    color: white;
+    height: auto;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 12px;
+    border: none;
+    width: 100%;
+}
+
+div.stButton > button#predict_stock:hover {
+    background-color: #840434;
+} */
+
+.custom-option-menu .st-emotion-cache-12w0qpk {
+    background-color: #840434 !important;
+}
+
+div.stButton > button[id$="_predict_stock"] {
+    background-color: #840434;
+    color: white;
+    height: auto;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 12px;
+    border: none;
+    width: 100%;
+}
+
+div.stButton > button[id$="_predict_stock"]:hover {
+    background-color: #a80543; /* Slightly lighter shade for hover effect */
+}
