@@ -314,28 +314,32 @@ def tab1():
                 SE_queries_detailed,
                 SE_query_embeddings_detailed,
             ) = load_se_models()
-            # Ensure the embeddings are on CPU
-            SE_query_embeddings = {
-                k: torch.tensor(v, device="cpu") for k, v in SE_query_embeddings.items()
-            }
-            SE_query_embeddings_detailed = {
-                k: torch.tensor(v, device="cpu")
-                for k, v in SE_query_embeddings_detailed.items()
-            }
-
-            text_embedding = SE_model.encode(text_input2, convert_to_tensor=True).cpu()
-
-            semantic_scores = {}
-            for key, query_embedding in SE_query_embeddings.items():
-                cosine_scores = util.pytorch_cos_sim(text_embedding, query_embedding)[0]
-                semantic_scores[key] = cosine_scores.numpy()
-
-            for key, query_embedding in SE_query_embeddings_detailed.items():
-                cosine_scores = util.pytorch_cos_sim(text_embedding, query_embedding)[0]
-                semantic_scores[key] = cosine_scores.numpy()
-
-            st.session_state[f"{tab_name}_semantic_scores"] = semantic_scores
-            st.session_state[f"{tab_name}_semantic_result_visible"] = True
+            
+            if SE_model is None or SE_query_embeddings is None or SE_query_embeddings_detailed is None:
+                st.error("Failed to load semantic embedding models. Please check the model files.")
+            else:
+                # Ensure the embeddings are on CPU
+                SE_query_embeddings = {
+                    k: torch.tensor(v, device="cpu") for k, v in SE_query_embeddings.items()
+                }
+                SE_query_embeddings_detailed = {
+                    k: torch.tensor(v, device="cpu")
+                    for k, v in SE_query_embeddings_detailed.items()
+                }
+    
+                text_embedding = SE_model.encode(text_input2, convert_to_tensor=True).cpu()
+    
+                semantic_scores = {}
+                for key, query_embedding in SE_query_embeddings.items():
+                    cosine_scores = util.pytorch_cos_sim(text_embedding, query_embedding)[0]
+                    semantic_scores[key] = cosine_scores.numpy()
+    
+                for key, query_embedding in SE_query_embeddings_detailed.items():
+                    cosine_scores = util.pytorch_cos_sim(text_embedding, query_embedding)[0]
+                    semantic_scores[key] = cosine_scores.numpy()
+    
+                st.session_state[f"{tab_name}_semantic_scores"] = semantic_scores
+                st.session_state[f"{tab_name}_semantic_result_visible"] = True
         else:
             st.session_state[f"{tab_name}_semantic_result_visible"] = False
         # del SE_model
