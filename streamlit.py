@@ -33,6 +33,17 @@ st.markdown(
 )
 
 
+def get_device():
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    else:
+        return torch.device("cpu")
+
+
+# Get the device once at the start of your script
+device = get_device()
+
+
 @st.cache_resource
 def load_model(model_type, ticker):
     """
@@ -79,21 +90,29 @@ def load_se_models():
         sentence_transformer_model = joblib.load(
             "models/sentence_transformer_model.joblib"
         )
-        # queries = joblib.load("models/queries.joblib")
         query_embeddings = joblib.load("models/query_embeddings.joblib")
         queries_detailed = joblib.load("models/queries_detailed.joblib")
         query_embeddings_detailed = joblib.load(
             "models/query_embeddings_detailed.joblib"
         )
+
+        # Move tensors to CPU explicitly
+        query_embeddings = {
+            k: torch.tensor(v).cpu() for k, v in query_embeddings.items()
+        }
+        query_embeddings_detailed = {
+            k: torch.tensor(v).cpu() for k, v in query_embeddings_detailed.items()
+        }
+
         return (
             sentence_transformer_model,
             query_embeddings,
             queries_detailed,
             query_embeddings_detailed,
         )
-    except FileNotFoundError as e:
-        st.error(f"Semantic embedding model or data file not found: {str(e)}")
-        return None, None, None, None, None
+    except Exception as e:
+        st.error(f"Error loading semantic embedding models: {str(e)}")
+        return None, None, None, None
 
 
 def initialize_session_state(tab_name):
