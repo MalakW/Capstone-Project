@@ -100,7 +100,7 @@ def initialize_session_state(tab_name):
         f"{tab_name}_prediction_date",
         f"{tab_name}_sentiment_result_visible",
         f"{tab_name}_semantic_result_visible",
-        f"{tab_name}_result_visible",  # Add this line
+        f"{tab_name}_result_visible",
         f"{tab_name}_sentiment_message",
     ]
     for key in keys:
@@ -381,7 +381,7 @@ def tab1():
         with sentiment_result_container:
             st.write(st.session_state[f"{tab_name}_sentiment_message"])
 
-    if st.session_state[f"{tab_name}_semantic_result_visible"]:
+    if st.session_state[f"{tab_name}_semantic_result_visible"]]:
         with semantic_result_container:
             st.write("Semantic similarity scores:")
             scores = list(st.session_state[f"{tab_name}_semantic_scores"].items())
