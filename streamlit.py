@@ -12,9 +12,11 @@ import numpy as np
 # Set up page layout
 st.set_page_config(layout="wide")
 
+
 def local_css(file_name):
     with open(file_name) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 
 local_css("styles/style.css")
 
@@ -30,14 +32,17 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
 def get_device():
     if torch.cuda.is_available():
         return torch.device("cuda")
     else:
         return torch.device("cpu")
 
+
 # Get the device once at the start of your script
 device = get_device()
+
 
 @st.cache_resource
 def load_model(model_type, ticker):
@@ -62,26 +67,34 @@ def load_model(model_type, ticker):
         st.error(f"Model file not found: {file_path}")
         return None
 
+
 @st.cache_resource
 def load_sa_models():
     """Load sentiment analysis models"""
     try:
         bert_sentiment_model = joblib.load("models/bert_sentiment_model.joblib")
         bert_tokenizer = joblib.load("models/bert_tokenizer.joblib")
-        sentiment_analysis_pipeline = joblib.load("models/sentiment_analysis_pipeline.joblib")
+        sentiment_analysis_pipeline = joblib.load(
+            "models/sentiment_analysis_pipeline.joblib"
+        )
         return bert_sentiment_model, bert_tokenizer, sentiment_analysis_pipeline
     except FileNotFoundError as e:
         st.error(f"Sentiment analysis model file not found: {str(e)}")
         return None, None, None
 
+
 @st.cache_resource
 def load_se_models():
     """Load semantic embedding models and data"""
     try:
-        sentence_transformer_model = joblib.load("models/sentence_transformer_model.joblib")
+        sentence_transformer_model = joblib.load(
+            "models/sentence_transformer_model.joblib"
+        )
         query_embeddings = joblib.load("models/query_embeddings.joblib")
         queries_detailed = joblib.load("models/queries_detailed.joblib")
-        query_embeddings_detailed = joblib.load("models/query_embeddings_detailed.joblib")
+        query_embeddings_detailed = joblib.load(
+            "models/query_embeddings_detailed.joblib"
+        )
         return (
             sentence_transformer_model,
             query_embeddings,
@@ -91,6 +104,7 @@ def load_se_models():
     except FileNotFoundError as e:
         st.error(f"Semantic embedding model or data file not found: {str(e)}")
         return None, None, None, None
+
 
 def initialize_session_state(tab_name):
     keys = [
@@ -111,6 +125,7 @@ def initialize_session_state(tab_name):
                 st.session_state[key] = False
             else:
                 st.session_state[key] = None
+
 
 def create_inputs(tab_name):
     col1, col2 = st.columns([6, 1])
@@ -160,6 +175,7 @@ def create_inputs(tab_name):
         stock_pred_container,
     )
 
+
 def prepare_input_data(data, scaler, seq_length=60):
     if data.ndim == 1:
         data = data.reshape(1, -1)
@@ -170,11 +186,13 @@ def prepare_input_data(data, scaler, seq_length=60):
 
     return input_data
 
+
 def truncate_text(text, tokenizer, max_length=512):
     tokens = tokenizer.tokenize(text)
     if len(tokens) > max_length - 2:
         tokens = tokens[: max_length - 2]
     return tokenizer.convert_tokens_to_string(tokens)
+
 
 @st.cache_data(show_spinner=False)
 def load_stock_data(ticker_symbol, period="2y"):
@@ -182,6 +200,7 @@ def load_stock_data(ticker_symbol, period="2y"):
     data = ticker.history(period=period).reset_index()
     data["Date"] = pd.to_datetime(data["Date"], utc=True)
     return data
+
 
 def plot_stock_price(data, split_date_str):
     split_date = pd.to_datetime(split_date_str, utc=True)
@@ -216,6 +235,7 @@ def plot_stock_price(data, split_date_str):
         yaxis=dict(showgrid=False, zeroline=False),
     )
     st.plotly_chart(fig)
+
 
 def tab1():
     tab_name = "Starbucks"
@@ -285,30 +305,43 @@ def tab1():
                 SE_queries_detailed,
                 SE_query_embeddings_detailed,
             ) = load_se_models()
-            
-            if SE_model is None or SE_query_embeddings is None or SE_query_embeddings_detailed is None:
-                st.error("Failed to load semantic embedding models. Please check the model files.")
+
+            if (
+                SE_model is None
+                or SE_query_embeddings is None
+                or SE_query_embeddings_detailed is None
+            ):
+                st.error(
+                    "Failed to load semantic embedding models. Please check the model files."
+                )
             else:
                 # Ensure the embeddings are on CPU
                 SE_query_embeddings = {
-                    k: torch.tensor(v, device="cpu") for k, v in SE_query_embeddings.items()
+                    k: torch.tensor(v, device="cpu")
+                    for k, v in SE_query_embeddings.items()
                 }
                 SE_query_embeddings_detailed = {
                     k: torch.tensor(v, device="cpu")
                     for k, v in SE_query_embeddings_detailed.items()
                 }
-    
-                text_embedding = SE_model.encode(text_input2, convert_to_tensor=True).cpu()
-    
+
+                text_embedding = SE_model.encode(
+                    text_input2, convert_to_tensor=True
+                ).cpu()
+
                 semantic_scores = {}
                 for key, query_embedding in SE_query_embeddings.items():
-                    cosine_scores = util.pytorch_cos_sim(text_embedding, query_embedding)[0]
+                    cosine_scores = util.pytorch_cos_sim(
+                        text_embedding, query_embedding
+                    )[0]
                     semantic_scores[key] = cosine_scores.numpy()
-    
+
                 for key, query_embedding in SE_query_embeddings_detailed.items():
-                    cosine_scores = util.pytorch_cos_sim(text_embedding, query_embedding)[0]
+                    cosine_scores = util.pytorch_cos_sim(
+                        text_embedding, query_embedding
+                    )[0]
                     semantic_scores[key] = cosine_scores.numpy()
-    
+
                 st.session_state[f"{tab_name}_semantic_scores"] = semantic_scores
                 st.session_state[f"{tab_name}_semantic_result_visible"] = True
         else:
@@ -320,7 +353,7 @@ def tab1():
 
     if stock_button:
         model_sbux = load_model("model", "sbux")
-        if hasattr(model_sbux, 'to'):
+        if hasattr(model_sbux, "to"):
             model_sbux = model_sbux.to(device)
         scaler_sbux = load_model("scaler", "sbux")
         date_input = pd.to_datetime(date_input).tz_localize("UTC").normalize()
@@ -364,7 +397,7 @@ def tab1():
         ).reshape(1, -1)
         input_data = prepare_input_data(input_features, scaler_sbux)
         input_data = torch.tensor(input_data, device=device)
-        if hasattr(model_sbux, 'predict'):
+        if hasattr(model_sbux, "predict"):
             prediction = model_sbux.predict(input_data)
         else:
             prediction = model_sbux(input_data)
@@ -381,7 +414,7 @@ def tab1():
         with sentiment_result_container:
             st.write(st.session_state[f"{tab_name}_sentiment_message"])
 
-    if st.session_state[f"{tab_name}_semantic_result_visible"]]:
+    if st.session_state[f"{tab_name}_semantic_result_visible"]:
         with semantic_result_container:
             st.write("Semantic similarity scores:")
             scores = list(st.session_state[f"{tab_name}_semantic_scores"].items())
@@ -414,6 +447,7 @@ def tab1():
         del model_sbux
     if scaler_sbux is not None:
         del scaler_sbux
+
 
 def tab2():
     tab_name = "McDonalds"
@@ -481,30 +515,43 @@ def tab2():
                 SE_queries_detailed,
                 SE_query_embeddings_detailed,
             ) = load_se_models()
-            
-            if SE_model is None or SE_query_embeddings is None or SE_query_embeddings_detailed is None:
-                st.error("Failed to load semantic embedding models. Please check the model files.")
+
+            if (
+                SE_model is None
+                or SE_query_embeddings is None
+                or SE_query_embeddings_detailed is None
+            ):
+                st.error(
+                    "Failed to load semantic embedding models. Please check the model files."
+                )
             else:
                 # Ensure the embeddings are on CPU
                 SE_query_embeddings = {
-                    k: torch.tensor(v, device="cpu") for k, v in SE_query_embeddings.items()
+                    k: torch.tensor(v, device="cpu")
+                    for k, v in SE_query_embeddings.items()
                 }
                 SE_query_embeddings_detailed = {
                     k: torch.tensor(v, device="cpu")
                     for k, v in SE_query_embeddings_detailed.items()
                 }
-    
-                text_embedding = SE_model.encode(text_input2, convert_to_tensor=True).cpu()
-    
+
+                text_embedding = SE_model.encode(
+                    text_input2, convert_to_tensor=True
+                ).cpu()
+
                 semantic_scores = {}
                 for key, query_embedding in SE_query_embeddings.items():
-                    cosine_scores = util.pytorch_cos_sim(text_embedding, query_embedding)[0]
+                    cosine_scores = util.pytorch_cos_sim(
+                        text_embedding, query_embedding
+                    )[0]
                     semantic_scores[key] = cosine_scores.numpy()
-    
+
                 for key, query_embedding in SE_query_embeddings_detailed.items():
-                    cosine_scores = util.pytorch_cos_sim(text_embedding, query_embedding)[0]
+                    cosine_scores = util.pytorch_cos_sim(
+                        text_embedding, query_embedding
+                    )[0]
                     semantic_scores[key] = cosine_scores.numpy()
-    
+
                 st.session_state[f"{tab_name}_semantic_scores"] = semantic_scores
                 st.session_state[f"{tab_name}_semantic_result_visible"] = True
         else:
@@ -512,7 +559,7 @@ def tab2():
 
     if stock_button:
         model_mcd = load_model("model", "mcd")
-        if hasattr(model_mcd, 'to'):
+        if hasattr(model_mcd, "to"):
             model_mcd = model_mcd.to(device)
         scaler_mcd = load_model("scaler", "mcd")
         date_input = pd.to_datetime(date_input).tz_localize("UTC").normalize()
@@ -556,7 +603,7 @@ def tab2():
         ).reshape(1, -1)
         input_data = prepare_input_data(input_features, scaler_mcd)
         input_data = torch.tensor(input_data, device=device)
-        if hasattr(model_mcd, 'predict'):
+        if hasattr(model_mcd, "predict"):
             prediction = model_mcd.predict(input_data)
         else:
             prediction = model_mcd(input_data)
@@ -606,6 +653,7 @@ def tab2():
         del model_mcd
     if scaler_mcd is not None:
         del scaler_mcd
+
 
 def tab3():
     tab_name = "Pepsi"
@@ -675,30 +723,43 @@ def tab3():
                 SE_queries_detailed,
                 SE_query_embeddings_detailed,
             ) = load_se_models()
-            
-            if SE_model is None or SE_query_embeddings is None or SE_query_embeddings_detailed is None:
-                st.error("Failed to load semantic embedding models. Please check the model files.")
+
+            if (
+                SE_model is None
+                or SE_query_embeddings is None
+                or SE_query_embeddings_detailed is None
+            ):
+                st.error(
+                    "Failed to load semantic embedding models. Please check the model files."
+                )
             else:
                 # Ensure the embeddings are on CPU
                 SE_query_embeddings = {
-                    k: torch.tensor(v, device="cpu") for k, v in SE_query_embeddings.items()
+                    k: torch.tensor(v, device="cpu")
+                    for k, v in SE_query_embeddings.items()
                 }
                 SE_query_embeddings_detailed = {
                     k: torch.tensor(v, device="cpu")
                     for k, v in SE_query_embeddings_detailed.items()
                 }
-    
-                text_embedding = SE_model.encode(text_input2, convert_to_tensor=True).cpu()
-    
+
+                text_embedding = SE_model.encode(
+                    text_input2, convert_to_tensor=True
+                ).cpu()
+
                 semantic_scores = {}
                 for key, query_embedding in SE_query_embeddings.items():
-                    cosine_scores = util.pytorch_cos_sim(text_embedding, query_embedding)[0]
+                    cosine_scores = util.pytorch_cos_sim(
+                        text_embedding, query_embedding
+                    )[0]
                     semantic_scores[key] = cosine_scores.numpy()
-    
+
                 for key, query_embedding in SE_query_embeddings_detailed.items():
-                    cosine_scores = util.pytorch_cos_sim(text_embedding, query_embedding)[0]
+                    cosine_scores = util.pytorch_cos_sim(
+                        text_embedding, query_embedding
+                    )[0]
                     semantic_scores[key] = cosine_scores.numpy()
-    
+
                 st.session_state[f"{tab_name}_semantic_scores"] = semantic_scores
                 st.session_state[f"{tab_name}_semantic_result_visible"] = True
         else:
@@ -706,7 +767,7 @@ def tab3():
 
     if stock_button:
         model_pep = load_model("model", "pep")
-        if hasattr(model_pep, 'to'):
+        if hasattr(model_pep, "to"):
             model_pep = model_pep.to(device)
         scaler_pep = load_model("scaler", "pep")
         date_input = pd.to_datetime(date_input).tz_localize("UTC").normalize()
@@ -750,7 +811,7 @@ def tab3():
         ).reshape(1, -1)
         input_data = prepare_input_data(input_features, scaler_pep)
         input_data = torch.tensor(input_data, device=device)
-        if hasattr(model_pep, 'predict'):
+        if hasattr(model_pep, "predict"):
             prediction = model_pep.predict(input_data)
         else:
             prediction = model_pep(input_data)
@@ -800,6 +861,7 @@ def tab3():
         del model_pep
     if scaler_pep is not None:
         del scaler_pep
+
 
 def tab4():
     tab_name = "CocaCola"
@@ -866,30 +928,43 @@ def tab4():
                 SE_queries_detailed,
                 SE_query_embeddings_detailed,
             ) = load_se_models()
-            
-            if SE_model is None or SE_query_embeddings is None or SE_query_embeddings_detailed is None:
-                st.error("Failed to load semantic embedding models. Please check the model files.")
+
+            if (
+                SE_model is None
+                or SE_query_embeddings is None
+                or SE_query_embeddings_detailed is None
+            ):
+                st.error(
+                    "Failed to load semantic embedding models. Please check the model files."
+                )
             else:
                 # Ensure the embeddings are on CPU
                 SE_query_embeddings = {
-                    k: torch.tensor(v, device="cpu") for k, v in SE_query_embeddings.items()
+                    k: torch.tensor(v, device="cpu")
+                    for k, v in SE_query_embeddings.items()
                 }
                 SE_query_embeddings_detailed = {
                     k: torch.tensor(v, device="cpu")
                     for k, v in SE_query_embeddings_detailed.items()
                 }
-    
-                text_embedding = SE_model.encode(text_input2, convert_to_tensor=True).cpu()
-    
+
+                text_embedding = SE_model.encode(
+                    text_input2, convert_to_tensor=True
+                ).cpu()
+
                 semantic_scores = {}
                 for key, query_embedding in SE_query_embeddings.items():
-                    cosine_scores = util.pytorch_cos_sim(text_embedding, query_embedding)[0]
+                    cosine_scores = util.pytorch_cos_sim(
+                        text_embedding, query_embedding
+                    )[0]
                     semantic_scores[key] = cosine_scores.numpy()
-    
+
                 for key, query_embedding in SE_query_embeddings_detailed.items():
-                    cosine_scores = util.pytorch_cos_sim(text_embedding, query_embedding)[0]
+                    cosine_scores = util.pytorch_cos_sim(
+                        text_embedding, query_embedding
+                    )[0]
                     semantic_scores[key] = cosine_scores.numpy()
-    
+
                 st.session_state[f"{tab_name}_semantic_scores"] = semantic_scores
                 st.session_state[f"{tab_name}_semantic_result_visible"] = True
         else:
@@ -897,7 +972,7 @@ def tab4():
 
     if stock_button:
         model_ko = load_model("model", "ko")
-        if hasattr(model_ko, 'to'):
+        if hasattr(model_ko, "to"):
             model_ko = model_ko.to(device)
         scaler_ko = load_model("scaler", "ko")
         date_input = pd.to_datetime(date_input).tz_localize("UTC").normalize()
@@ -941,7 +1016,7 @@ def tab4():
         ).reshape(1, -1)
         input_data = prepare_input_data(input_features, scaler_ko)
         input_data = torch.tensor(input_data, device=device)
-        if hasattr(model_ko, 'predict'):
+        if hasattr(model_ko, "predict"):
             prediction = model_ko.predict(input_data)
         else:
             prediction = model_ko(input_data)
@@ -991,6 +1066,7 @@ def tab4():
         del model_ko
     if scaler_ko is not None:
         del scaler_ko
+
 
 # Create a top menu
 tabs = option_menu(
