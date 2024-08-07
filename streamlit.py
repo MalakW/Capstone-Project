@@ -321,7 +321,9 @@ def tab1():
         # del SE_query_embeddings_detailed
 
     if stock_button:
-        model_sbux = load_model("model", "sbux").to(device)
+        model_sbux = load_model("model", "sbux")
+        if hasattr(model_sbux, 'to'):
+            model_sbux = model_sbux.to(device)
         scaler_sbux = load_model("scaler", "sbux")
         date_input = pd.to_datetime(date_input).tz_localize("UTC").normalize()
         next_day = date_input + pd.Timedelta(days=1)
@@ -364,7 +366,10 @@ def tab1():
         ).reshape(1, -1)
         input_data = prepare_input_data(input_features, scaler_sbux)
         input_data = torch.tensor(input_data, device=device)
-        prediction = model_sbux(input_data)
+        if hasattr(model_sbux, 'predict'):
+            prediction = model_sbux.predict(input_data)
+        else:
+            prediction = model_sbux(input_data)
 
         inverse_prediction = np.zeros((prediction.shape[0], 5))
         inverse_prediction[:, 0] = prediction.flatten()
@@ -508,7 +513,9 @@ def tab2():
             st.session_state[f"{tab_name}_semantic_result_visible"] = False
 
     if stock_button:
-        model_mcd = load_model("model", "mcd").to(device)
+        model_mcd = load_model("model", "mcd")
+        if hasattr(model_mcd, 'to'):
+            model_mcd = model_mcd.to(device)
         scaler_mcd = load_model("scaler", "mcd")
         date_input = pd.to_datetime(date_input).tz_localize("UTC").normalize()
         next_day = date_input + pd.Timedelta(days=1)
@@ -551,7 +558,10 @@ def tab2():
         ).reshape(1, -1)
         input_data = prepare_input_data(input_features, scaler_mcd)
         input_data = torch.tensor(input_data, device=device)
-        prediction = model_mcd(input_data)
+        if hasattr(model_mcd, 'predict'):
+            prediction = model_mcd.predict(input_data)
+        else:
+            prediction = model_mcd(input_data)
 
         inverse_prediction = np.zeros((prediction.shape[0], 5))
         inverse_prediction[:, 0] = prediction.flatten()
@@ -697,7 +707,9 @@ def tab3():
             st.session_state[f"{tab_name}_semantic_result_visible"] = False
 
     if stock_button:
-        model_pep = load_model("model", "pep").to(device)
+        model_pep = load_model("model", "pep")
+        if hasattr(model_pep, 'to'):
+            model_pep = model_pep.to(device)
         scaler_pep = load_model("scaler", "pep")
         date_input = pd.to_datetime(date_input).tz_localize("UTC").normalize()
         next_day = date_input + pd.Timedelta(days=1)
@@ -740,7 +752,10 @@ def tab3():
         ).reshape(1, -1)
         input_data = prepare_input_data(input_features, scaler_pep)
         input_data = torch.tensor(input_data, device=device)
-        prediction = model_pep(input_data)
+        if hasattr(model_pep, 'predict'):
+            prediction = model_pep.predict(input_data)
+        else:
+            prediction = model_pep(input_data)
 
         inverse_prediction = np.zeros((prediction.shape[0], 5))
         inverse_prediction[:, 0] = prediction.flatten()
@@ -883,7 +898,9 @@ def tab4():
             st.session_state[f"{tab_name}_semantic_result_visible"] = False
 
     if stock_button:
-        model_ko = load_model("model", "ko").to(device)
+        model_ko = load_model("model", "ko")
+        if hasattr(model_ko, 'to'):
+            model_ko = model_ko.to(device)
         scaler_ko = load_model("scaler", "ko")
         date_input = pd.to_datetime(date_input).tz_localize("UTC").normalize()
         next_day = date_input + pd.Timedelta(days=1)
@@ -926,7 +943,10 @@ def tab4():
         ).reshape(1, -1)
         input_data = prepare_input_data(input_features, scaler_ko)
         input_data = torch.tensor(input_data, device=device)
-        prediction = model_ko(input_data)
+        if hasattr(model_ko, 'predict'):
+            prediction = model_ko.predict(input_data)
+        else:
+            prediction = model_ko(input_data)
 
         inverse_prediction = np.zeros((prediction.shape[0], 5))
         inverse_prediction[:, 0] = prediction.flatten()
