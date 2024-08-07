@@ -34,10 +34,12 @@ st.markdown(
 
 
 def get_device():
-    if torch.cuda.is_available():
-        return torch.device("cuda")
+    if torch.backends.mps.is_available():
+    device = torch.device("mps")
+    elif torch.cuda.is_available():
+        device = torch.device("cuda")
     else:
-        return torch.device("cpu")
+        device = torch.device("cpu")
 
 
 # Get the device once at the start of your script
