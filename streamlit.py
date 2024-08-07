@@ -12,11 +12,9 @@ import numpy as np
 # Set up page layout
 st.set_page_config(layout="wide")
 
-
 def local_css(file_name):
     with open(file_name) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
 
 local_css("styles/style.css")
 
@@ -32,19 +30,16 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-
 def get_device():
     if torch.backends.mps.is_available():
-        device = torch.device("mps")
+        return torch.device("mps")
     elif torch.cuda.is_available():
-        device = torch.device("cuda")
+        return torch.device("cuda")
     else:
-        device = torch.device("cpu")
-
+        return torch.device("cpu")
 
 # Get the device once at the start of your script
 device = get_device()
-
 
 @st.cache_resource
 def load_model(model_type, ticker):
@@ -69,34 +64,26 @@ def load_model(model_type, ticker):
         st.error(f"Model file not found: {file_path}")
         return None
 
-
 @st.cache_resource
 def load_sa_models():
     """Load sentiment analysis models"""
     try:
         bert_sentiment_model = joblib.load("models/bert_sentiment_model.joblib")
         bert_tokenizer = joblib.load("models/bert_tokenizer.joblib")
-        sentiment_analysis_pipeline = joblib.load(
-            "models/sentiment_analysis_pipeline.joblib"
-        )
+        sentiment_analysis_pipeline = joblib.load("models/sentiment_analysis_pipeline.joblib")
         return bert_sentiment_model, bert_tokenizer, sentiment_analysis_pipeline
     except FileNotFoundError as e:
         st.error(f"Sentiment analysis model file not found: {str(e)}")
         return None, None, None
 
-
 @st.cache_resource
 def load_se_models():
     """Load semantic embedding models and data"""
     try:
-        sentence_transformer_model = joblib.load(
-            "models/sentence_transformer_model.joblib"
-        )
+        sentence_transformer_model = joblib.load("models/sentence_transformer_model.joblib")
         query_embeddings = joblib.load("models/query_embeddings.joblib")
         queries_detailed = joblib.load("models/queries_detailed.joblib")
-        query_embeddings_detailed = joblib.load(
-            "models/query_embeddings_detailed.joblib"
-        )
+        query_embeddings_detailed = joblib.load("models/query_embeddings_detailed.joblib")
         return (
             sentence_transformer_model,
             query_embeddings,
@@ -106,7 +93,6 @@ def load_se_models():
     except FileNotFoundError as e:
         st.error(f"Semantic embedding model or data file not found: {str(e)}")
         return None, None, None, None
-
 
 def initialize_session_state(tab_name):
     keys = [
@@ -127,7 +113,6 @@ def initialize_session_state(tab_name):
                 st.session_state[key] = False
             else:
                 st.session_state[key] = None
-
 
 def create_inputs(tab_name):
     col1, col2 = st.columns([6, 1])
@@ -177,7 +162,6 @@ def create_inputs(tab_name):
         stock_pred_container,
     )
 
-
 def prepare_input_data(data, scaler, seq_length=60):
     if data.ndim == 1:
         data = data.reshape(1, -1)
@@ -188,13 +172,11 @@ def prepare_input_data(data, scaler, seq_length=60):
 
     return input_data
 
-
 def truncate_text(text, tokenizer, max_length=512):
     tokens = tokenizer.tokenize(text)
     if len(tokens) > max_length - 2:
         tokens = tokens[: max_length - 2]
     return tokenizer.convert_tokens_to_string(tokens)
-
 
 @st.cache_data(show_spinner=False)
 def load_stock_data(ticker_symbol, period="2y"):
@@ -202,7 +184,6 @@ def load_stock_data(ticker_symbol, period="2y"):
     data = ticker.history(period=period).reset_index()
     data["Date"] = pd.to_datetime(data["Date"], utc=True)
     return data
-
 
 def plot_stock_price(data, split_date_str):
     split_date = pd.to_datetime(split_date_str, utc=True)
@@ -237,7 +218,6 @@ def plot_stock_price(data, split_date_str):
         yaxis=dict(showgrid=False, zeroline=False),
     )
     st.plotly_chart(fig)
-
 
 def tab1():
     tab_name = "Starbucks"
@@ -339,8 +319,9 @@ def tab1():
         # del SE_query_embeddings
         # del SE_queries_detailed
         # del SE_query_embeddings_detailed
+
     if stock_button:
-        model_sbux = load_model("model", "sbux")
+        model_sbux = load_model("model", "sbux").to(device)
         scaler_sbux = load_model("scaler", "sbux")
         date_input = pd.to_datetime(date_input).tz_localize("UTC").normalize()
         next_day = date_input + pd.Timedelta(days=1)
@@ -382,7 +363,8 @@ def tab1():
             ]
         ).reshape(1, -1)
         input_data = prepare_input_data(input_features, scaler_sbux)
-        prediction = model_sbux.predict(input_data)
+        input_data = torch.tensor(input_data, device=device)
+        prediction = model_sbux(input_data)
 
         inverse_prediction = np.zeros((prediction.shape[0], 5))
         inverse_prediction[:, 0] = prediction.flatten()
@@ -429,7 +411,6 @@ def tab1():
         del model_sbux
     if scaler_sbux is not None:
         del scaler_sbux
-
 
 def tab2():
     tab_name = "McDonalds"
@@ -489,7 +470,6 @@ def tab2():
         # del SA_sentiment_analysis
         # del SA_model
 
-
     if submit_button2:
         if text_input2:
             (
@@ -528,7 +508,7 @@ def tab2():
             st.session_state[f"{tab_name}_semantic_result_visible"] = False
 
     if stock_button:
-        model_mcd = load_model("model", "mcd")
+        model_mcd = load_model("model", "mcd").to(device)
         scaler_mcd = load_model("scaler", "mcd")
         date_input = pd.to_datetime(date_input).tz_localize("UTC").normalize()
         next_day = date_input + pd.Timedelta(days=1)
@@ -570,7 +550,8 @@ def tab2():
             ]
         ).reshape(1, -1)
         input_data = prepare_input_data(input_features, scaler_mcd)
-        prediction = model_mcd.predict(input_data)
+        input_data = torch.tensor(input_data, device=device)
+        prediction = model_mcd(input_data)
 
         inverse_prediction = np.zeros((prediction.shape[0], 5))
         inverse_prediction[:, 0] = prediction.flatten()
@@ -618,9 +599,7 @@ def tab2():
     if scaler_mcd is not None:
         del scaler_mcd
 
-
 def tab3():
-
     tab_name = "Pepsi"
     initialize_session_state(tab_name)
 
@@ -718,7 +697,7 @@ def tab3():
             st.session_state[f"{tab_name}_semantic_result_visible"] = False
 
     if stock_button:
-        model_pep = load_model("model", "pep")
+        model_pep = load_model("model", "pep").to(device)
         scaler_pep = load_model("scaler", "pep")
         date_input = pd.to_datetime(date_input).tz_localize("UTC").normalize()
         next_day = date_input + pd.Timedelta(days=1)
@@ -760,7 +739,8 @@ def tab3():
             ]
         ).reshape(1, -1)
         input_data = prepare_input_data(input_features, scaler_pep)
-        prediction = model_pep.predict(input_data)
+        input_data = torch.tensor(input_data, device=device)
+        prediction = model_pep(input_data)
 
         inverse_prediction = np.zeros((prediction.shape[0], 5))
         inverse_prediction[:, 0] = prediction.flatten()
@@ -807,7 +787,6 @@ def tab3():
         del model_pep
     if scaler_pep is not None:
         del scaler_pep
-
 
 def tab4():
     tab_name = "CocaCola"
@@ -866,7 +845,6 @@ def tab4():
             )
             st.session_state[f"{tab_name}_sentiment_result_visible"] = True
 
-
     if submit_button2:
         if text_input2:
             (
@@ -905,7 +883,7 @@ def tab4():
             st.session_state[f"{tab_name}_semantic_result_visible"] = False
 
     if stock_button:
-        model_ko = load_model("model", "ko")
+        model_ko = load_model("model", "ko").to(device)
         scaler_ko = load_model("scaler", "ko")
         date_input = pd.to_datetime(date_input).tz_localize("UTC").normalize()
         next_day = date_input + pd.Timedelta(days=1)
@@ -947,7 +925,8 @@ def tab4():
             ]
         ).reshape(1, -1)
         input_data = prepare_input_data(input_features, scaler_ko)
-        prediction = model_ko.predict(input_data)
+        input_data = torch.tensor(input_data, device=device)
+        prediction = model_ko(input_data)
 
         inverse_prediction = np.zeros((prediction.shape[0], 5))
         inverse_prediction[:, 0] = prediction.flatten()
@@ -994,7 +973,6 @@ def tab4():
         del model_ko
     if scaler_ko is not None:
         del scaler_ko
-
 
 # Create a top menu
 tabs = option_menu(
