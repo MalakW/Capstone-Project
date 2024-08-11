@@ -452,11 +452,11 @@ def tab2():
                 st.session_state[f"{tab_name}_sentiment"] = result[0]["label"]
                 if st.session_state[f"{tab_name}_sentiment"] == "LABEL_1":
                     st.session_state[f"{tab_name}_sentiment_message"] = (
-                        "This text has a positive sentiment."
+                        f"{result[0]["label"]}: This text has a positive sentiment."
                     )
                 else:
                     st.session_state[f"{tab_name}_sentiment_message"] = (
-                        "This text has a negative sentiment."
+                        f"{result[0]["label"]}: This text has a negative sentiment."
                     )
             else:
                 st.session_state[f"{tab_name}_sentiment_message"] = (
@@ -623,11 +623,11 @@ def tab3():
                 st.session_state[f"{tab_name}_sentiment"] = result[0]["label"]
                 if st.session_state[f"{tab_name}_sentiment"] == "LABEL_1":
                     st.session_state[f"{tab_name}_sentiment_message"] = (
-                        "This text has a positive sentiment."
+                        f"{result[0]["label"]}: This text has a positive sentiment."
                     )
                 else:
                     st.session_state[f"{tab_name}_sentiment_message"] = (
-                        "This text has a negative sentiment."
+                        f"{result[0]["label"]}: This text has a negative sentiment."
                     )
             else:
                 st.session_state[f"{tab_name}_sentiment_message"] = (
@@ -794,11 +794,11 @@ def tab4():
                 st.session_state[f"{tab_name}_sentiment"] = result[0]["label"]
                 if st.session_state[f"{tab_name}_sentiment"] == "LABEL_1":
                     st.session_state[f"{tab_name}_sentiment_message"] = (
-                        "This text has a positive sentiment."
+                        f"{result[0]["label"]}: This text has a positive sentiment."
                     )
                 else:
                     st.session_state[f"{tab_name}_sentiment_message"] = (
-                        "This text has a negative sentiment."
+                        f"{result[0]["label"]}: This text has a negative sentiment."
                     )
             else:
                 st.session_state[f"{tab_name}_sentiment_message"] = (
