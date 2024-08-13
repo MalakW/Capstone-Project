@@ -271,21 +271,18 @@ def tab1():
     if submit_button:
         if text_input1:
             SA_model, SA_tokenizer, SA_sentiment_analysis, bert_model = load_sa_models()
-
+    
             truncated_text = truncate_text(text_input1, SA_tokenizer)
-            result = bert_model(truncated_text)
-
+            inputs = SA_tokenizer(truncated_text, return_tensors="pt", max_length=512, truncation=True)
+            inputs = inputs.to(device)
+            result = bert_model(**inputs)
+    
             if result:
-                st.session_state[f"{tab_name}_sentiment"] = result[0]["label"]
-                
-                if st.session_state[f"{tab_name}_sentiment"] == "LABEL_1":
-                    st.session_state[f"{tab_name}_sentiment_message"] = (
-                        f"{result[0]["label"]}: This text has a positive sentiment."
-                    )
-                else:
-                    st.session_state[f"{tab_name}_sentiment_message"] = (
-                        f"{result[0]["label"]}: This text has a negative sentiment."
-                    )
+                sentiment = torch.argmax(result.logits, dim=1).item()
+                st.session_state[f"{tab_name}_sentiment"] = "LABEL_1" if sentiment == 1 else "LABEL_0"
+                st.session_state[f"{tab_name}_sentiment_message"] = (
+                    f"{st.session_state[f'{tab_name}_sentiment']}: This text has a {'positive' if sentiment == 1 else 'negative'} sentiment."
+                )
             else:
                 st.session_state[f"{tab_name}_sentiment_message"] = (
                     "Unable to determine sentiment. Please try again with a different text."
@@ -296,9 +293,6 @@ def tab1():
                 "Please enter some text before submitting."
             )
             st.session_state[f"{tab_name}_sentiment_result_visible"] = True
-        # del SA_tokenizer
-        # del SA_sentiment_analysis
-        # del SA_model
 
     if submit_button2:
         if text_input2:
@@ -444,21 +438,19 @@ def tab2():
 
     if submit_button:
         if text_input1:
-            SA_model, SA_tokenizer, SA_sentiment_analysis,bert_model = load_sa_models()
-
+            SA_model, SA_tokenizer, SA_sentiment_analysis, bert_model = load_sa_models()
+    
             truncated_text = truncate_text(text_input1, SA_tokenizer)
-            result = bert_model(truncated_text)
-
+            inputs = SA_tokenizer(truncated_text, return_tensors="pt", max_length=512, truncation=True)
+            inputs = inputs.to(device)
+            result = bert_model(**inputs)
+    
             if result:
-                st.session_state[f"{tab_name}_sentiment"] = result[0]["label"]
-                if st.session_state[f"{tab_name}_sentiment"] == "LABEL_1":
-                    st.session_state[f"{tab_name}_sentiment_message"] = (
-                        f"{result[0]["label"]}: This text has a positive sentiment."
-                    )
-                else:
-                    st.session_state[f"{tab_name}_sentiment_message"] = (
-                        f"{result[0]["label"]}: This text has a negative sentiment."
-                    )
+                sentiment = torch.argmax(result.logits, dim=1).item()
+                st.session_state[f"{tab_name}_sentiment"] = "LABEL_1" if sentiment == 1 else "LABEL_0"
+                st.session_state[f"{tab_name}_sentiment_message"] = (
+                    f"{st.session_state[f'{tab_name}_sentiment']}: This text has a {'positive' if sentiment == 1 else 'negative'} sentiment."
+                )
             else:
                 st.session_state[f"{tab_name}_sentiment_message"] = (
                     "Unable to determine sentiment. Please try again with a different text."
@@ -469,9 +461,6 @@ def tab2():
                 "Please enter some text before submitting."
             )
             st.session_state[f"{tab_name}_sentiment_result_visible"] = True
-        # del SA_tokenizer
-        # del SA_sentiment_analysis
-        # del SA_model
 
     if submit_button2:
         if text_input2:
@@ -615,21 +604,19 @@ def tab3():
 
     if submit_button:
         if text_input1:
-            SA_model, SA_tokenizer, SA_sentiment_analysis,bert_model = load_sa_models()
-
+            SA_model, SA_tokenizer, SA_sentiment_analysis, bert_model = load_sa_models()
+    
             truncated_text = truncate_text(text_input1, SA_tokenizer)
-            result = bert_model(truncated_text)
-
+            inputs = SA_tokenizer(truncated_text, return_tensors="pt", max_length=512, truncation=True)
+            inputs = inputs.to(device)
+            result = bert_model(**inputs)
+    
             if result:
-                st.session_state[f"{tab_name}_sentiment"] = result[0]["label"]
-                if st.session_state[f"{tab_name}_sentiment"] == "LABEL_1":
-                    st.session_state[f"{tab_name}_sentiment_message"] = (
-                        f"{result[0]["label"]}: This text has a positive sentiment."
-                    )
-                else:
-                    st.session_state[f"{tab_name}_sentiment_message"] = (
-                        f"{result[0]["label"]}: This text has a negative sentiment."
-                    )
+                sentiment = torch.argmax(result.logits, dim=1).item()
+                st.session_state[f"{tab_name}_sentiment"] = "LABEL_1" if sentiment == 1 else "LABEL_0"
+                st.session_state[f"{tab_name}_sentiment_message"] = (
+                    f"{st.session_state[f'{tab_name}_sentiment']}: This text has a {'positive' if sentiment == 1 else 'negative'} sentiment."
+                )
             else:
                 st.session_state[f"{tab_name}_sentiment_message"] = (
                     "Unable to determine sentiment. Please try again with a different text."
@@ -640,9 +627,6 @@ def tab3():
                 "Please enter some text before submitting."
             )
             st.session_state[f"{tab_name}_sentiment_result_visible"] = True
-        # del SA_tokenizer
-        # del SA_sentiment_analysis
-        # del SA_model
 
     if submit_button2:
         if text_input2:
@@ -787,20 +771,18 @@ def tab4():
     if submit_button:
         if text_input1:
             SA_model, SA_tokenizer, SA_sentiment_analysis, bert_model = load_sa_models()
-
+    
             truncated_text = truncate_text(text_input1, SA_tokenizer)
-            result = bert_model(truncated_text)
-
+            inputs = SA_tokenizer(truncated_text, return_tensors="pt", max_length=512, truncation=True)
+            inputs = inputs.to(device)
+            result = bert_model(**inputs)
+    
             if result:
-                st.session_state[f"{tab_name}_sentiment"] = result[0]["label"]
-                if st.session_state[f"{tab_name}_sentiment"] == "LABEL_1":
-                    st.session_state[f"{tab_name}_sentiment_message"] = (
-                        f"{result[0]["label"]}: This text has a positive sentiment."
-                    )
-                else:
-                    st.session_state[f"{tab_name}_sentiment_message"] = (
-                        f"{result[0]["label"]}: This text has a negative sentiment."
-                    )
+                sentiment = torch.argmax(result.logits, dim=1).item()
+                st.session_state[f"{tab_name}_sentiment"] = "LABEL_1" if sentiment == 1 else "LABEL_0"
+                st.session_state[f"{tab_name}_sentiment_message"] = (
+                    f"{st.session_state[f'{tab_name}_sentiment']}: This text has a {'positive' if sentiment == 1 else 'negative'} sentiment."
+                )
             else:
                 st.session_state[f"{tab_name}_sentiment_message"] = (
                     "Unable to determine sentiment. Please try again with a different text."
