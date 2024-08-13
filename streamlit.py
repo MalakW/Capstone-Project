@@ -78,10 +78,11 @@ def load_sa_models():
         sentiment_analysis_pipeline = joblib.load(
             "models/sentiment_analysis_pipeline.joblib"
         )
-        return bert_sentiment_model, bert_tokenizer, sentiment_analysis_pipeline
+        bert_model= joblib.load("models/bert_sentiment_model.joblib")
+        return bert_sentiment_model, bert_tokenizer, sentiment_analysis_pipeline, bert_model
     except FileNotFoundError as e:
         st.error(f"Sentiment analysis model file not found: {str(e)}")
-        return None, None, None
+        return None, None, None, None
 
 
 @st.cache_resource
@@ -243,7 +244,7 @@ def tab1():
     initialize_session_state(tab_name)
 
     # Initialize all potential variables at the function level
-    SA_model = SA_tokenizer = SA_sentiment_analysis = None
+    SA_model = SA_tokenizer = SA_sentiment_analysis = bert_model= None
     SE_model = SE_query_embeddings = SE_queries_detailed = (
         SE_query_embeddings_detailed
     ) = None
@@ -269,10 +270,10 @@ def tab1():
 
     if submit_button:
         if text_input1:
-            SA_model, SA_tokenizer, SA_sentiment_analysis = load_sa_models()
+            SA_model, SA_tokenizer, SA_sentiment_analysis, bert_model = load_sa_models()
 
             truncated_text = truncate_text(text_input1, SA_tokenizer)
-            result = SA_sentiment_analysis(truncated_text)
+            result = bert_model(truncated_text)
 
             if result:
                 st.session_state[f"{tab_name}_sentiment"] = result[0]["label"]
@@ -398,8 +399,8 @@ def tab1():
         del SA_model
     if SA_tokenizer is not None:
         del SA_tokenizer
-    if SA_sentiment_analysis is not None:
-        del SA_sentiment_analysis
+    if bert_model is not None:
+        del bert_model
     if SE_model is not None:
         del SE_model
     if SE_query_embeddings is not None:
@@ -418,7 +419,7 @@ def tab2():
     tab_name = "McDonalds"
     initialize_session_state(tab_name)
     # Initialize all potential variables at the function level
-    SA_model = SA_tokenizer = SA_sentiment_analysis = None
+    SA_model = SA_tokenizer = SA_sentiment_analysis = bert_model=None
     SE_model = SE_query_embeddings = SE_queries_detailed = (
         SE_query_embeddings_detailed
     ) = None
@@ -443,10 +444,10 @@ def tab2():
 
     if submit_button:
         if text_input1:
-            SA_model, SA_tokenizer, SA_sentiment_analysis = load_sa_models()
+            SA_model, SA_tokenizer, SA_sentiment_analysis,bert_model = load_sa_models()
 
             truncated_text = truncate_text(text_input1, SA_tokenizer)
-            result = SA_sentiment_analysis(truncated_text)
+            result = bert_model(truncated_text)
 
             if result:
                 st.session_state[f"{tab_name}_sentiment"] = result[0]["label"]
@@ -567,8 +568,8 @@ def tab2():
         del SA_model
     if SA_tokenizer is not None:
         del SA_tokenizer
-    if SA_sentiment_analysis is not None:
-        del SA_sentiment_analysis
+    if bert_model is not None:
+        del bert_model
     if SE_model is not None:
         del SE_model
     if SE_query_embeddings is not None:
@@ -588,7 +589,7 @@ def tab3():
     initialize_session_state(tab_name)
 
     # Initialize all potential variables at the function level
-    SA_model = SA_tokenizer = SA_sentiment_analysis = None
+    SA_model = SA_tokenizer = SA_sentiment_analysis = bert_model= None
     SE_model = SE_query_embeddings = SE_queries_detailed = (
         SE_query_embeddings_detailed
     ) = None
@@ -614,10 +615,10 @@ def tab3():
 
     if submit_button:
         if text_input1:
-            SA_model, SA_tokenizer, SA_sentiment_analysis = load_sa_models()
+            SA_model, SA_tokenizer, SA_sentiment_analysis,bert_model = load_sa_models()
 
             truncated_text = truncate_text(text_input1, SA_tokenizer)
-            result = SA_sentiment_analysis(truncated_text)
+            result = bert_model(truncated_text)
 
             if result:
                 st.session_state[f"{tab_name}_sentiment"] = result[0]["label"]
@@ -738,8 +739,8 @@ def tab3():
         del SA_model
     if SA_tokenizer is not None:
         del SA_tokenizer
-    if SA_sentiment_analysis is not None:
-        del SA_sentiment_analysis
+    if bert_model is not None:
+        del bert_model
     if SE_model is not None:
         del SE_model
     if SE_query_embeddings is not None:
@@ -759,7 +760,7 @@ def tab4():
     initialize_session_state(tab_name)
 
     # Initialize all potential variables at the function level
-    SA_model = SA_tokenizer = SA_sentiment_analysis = None
+    SA_model = SA_tokenizer = SA_sentiment_analysis =bert_model= None
     SE_model = SE_query_embeddings = SE_queries_detailed = (
         SE_query_embeddings_detailed
     ) = None
@@ -785,10 +786,10 @@ def tab4():
 
     if submit_button:
         if text_input1:
-            SA_model, SA_tokenizer, SA_sentiment_analysis = load_sa_models()
+            SA_model, SA_tokenizer, SA_sentiment_analysis, bert_model = load_sa_models()
 
             truncated_text = truncate_text(text_input1, SA_tokenizer)
-            result = SA_sentiment_analysis(truncated_text)
+            result = bert_model(truncated_text)
 
             if result:
                 st.session_state[f"{tab_name}_sentiment"] = result[0]["label"]
@@ -906,8 +907,8 @@ def tab4():
         del SA_model
     if SA_tokenizer is not None:
         del SA_tokenizer
-    if SA_sentiment_analysis is not None:
-        del SA_sentiment_analysis
+    if bert_model is not None:
+        del bert_model
     if SE_model is not None:
         del SE_model
     if SE_query_embeddings is not None:
