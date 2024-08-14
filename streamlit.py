@@ -78,8 +78,13 @@ def load_sa_models():
         sentiment_analysis_pipeline = joblib.load(
             "models/sentiment_analysis_pipeline.joblib"
         )
-        bert_model= joblib.load("models/bert_sentiment_model.joblib")
-        return bert_sentiment_model, bert_tokenizer, sentiment_analysis_pipeline, bert_model
+        bert_model = joblib.load("models/bert_sentiment_analysis_pipeline.joblib")
+        return (
+            bert_sentiment_model,
+            bert_tokenizer,
+            sentiment_analysis_pipeline,
+            bert_model,
+        )
     except FileNotFoundError as e:
         st.error(f"Sentiment analysis model file not found: {str(e)}")
         return None, None, None, None
@@ -244,7 +249,7 @@ def tab1():
     initialize_session_state(tab_name)
 
     # Initialize all potential variables at the function level
-    SA_model = SA_tokenizer = SA_sentiment_analysis = bert_model= None
+    SA_model = SA_tokenizer = SA_sentiment_analysis = bert_model = None
     SE_model = SE_query_embeddings = SE_queries_detailed = (
         SE_query_embeddings_detailed
     ) = None
@@ -271,15 +276,19 @@ def tab1():
     if submit_button:
         if text_input1:
             SA_model, SA_tokenizer, SA_sentiment_analysis, bert_model = load_sa_models()
-    
+
             truncated_text = truncate_text(text_input1, SA_tokenizer)
-            inputs = SA_tokenizer(truncated_text, return_tensors="pt", max_length=512, truncation=True)
+            inputs = SA_tokenizer(
+                truncated_text, return_tensors="pt", max_length=512, truncation=True
+            )
             inputs = inputs.to(device)
             result = bert_model(**inputs)
-    
+
             if result:
                 sentiment = torch.argmax(result.logits, dim=1).item()
-                st.session_state[f"{tab_name}_sentiment"] = "LABEL_1" if sentiment == 1 else "LABEL_0"
+                st.session_state[f"{tab_name}_sentiment"] = (
+                    "LABEL_1" if sentiment == 1 else "LABEL_0"
+                )
                 st.session_state[f"{tab_name}_sentiment_message"] = (
                     f"{st.session_state[f'{tab_name}_sentiment']}: This text has a {'positive' if sentiment == 1 else 'negative'} sentiment."
                 )
@@ -413,7 +422,7 @@ def tab2():
     tab_name = "McDonalds"
     initialize_session_state(tab_name)
     # Initialize all potential variables at the function level
-    SA_model = SA_tokenizer = SA_sentiment_analysis = bert_model=None
+    SA_model = SA_tokenizer = SA_sentiment_analysis = bert_model = None
     SE_model = SE_query_embeddings = SE_queries_detailed = (
         SE_query_embeddings_detailed
     ) = None
@@ -439,15 +448,19 @@ def tab2():
     if submit_button:
         if text_input1:
             SA_model, SA_tokenizer, SA_sentiment_analysis, bert_model = load_sa_models()
-    
+
             truncated_text = truncate_text(text_input1, SA_tokenizer)
-            inputs = SA_tokenizer(truncated_text, return_tensors="pt", max_length=512, truncation=True)
+            inputs = SA_tokenizer(
+                truncated_text, return_tensors="pt", max_length=512, truncation=True
+            )
             inputs = inputs.to(device)
             result = bert_model(**inputs)
-    
+
             if result:
                 sentiment = torch.argmax(result.logits, dim=1).item()
-                st.session_state[f"{tab_name}_sentiment"] = "LABEL_1" if sentiment == 1 else "LABEL_0"
+                st.session_state[f"{tab_name}_sentiment"] = (
+                    "LABEL_1" if sentiment == 1 else "LABEL_0"
+                )
                 st.session_state[f"{tab_name}_sentiment_message"] = (
                     f"{st.session_state[f'{tab_name}_sentiment']}: This text has a {'positive' if sentiment == 1 else 'negative'} sentiment."
                 )
@@ -578,7 +591,7 @@ def tab3():
     initialize_session_state(tab_name)
 
     # Initialize all potential variables at the function level
-    SA_model = SA_tokenizer = SA_sentiment_analysis = bert_model= None
+    SA_model = SA_tokenizer = SA_sentiment_analysis = bert_model = None
     SE_model = SE_query_embeddings = SE_queries_detailed = (
         SE_query_embeddings_detailed
     ) = None
@@ -605,15 +618,19 @@ def tab3():
     if submit_button:
         if text_input1:
             SA_model, SA_tokenizer, SA_sentiment_analysis, bert_model = load_sa_models()
-    
+
             truncated_text = truncate_text(text_input1, SA_tokenizer)
-            inputs = SA_tokenizer(truncated_text, return_tensors="pt", max_length=512, truncation=True)
+            inputs = SA_tokenizer(
+                truncated_text, return_tensors="pt", max_length=512, truncation=True
+            )
             inputs = inputs.to(device)
             result = bert_model(**inputs)
-    
+
             if result:
                 sentiment = torch.argmax(result.logits, dim=1).item()
-                st.session_state[f"{tab_name}_sentiment"] = "LABEL_1" if sentiment == 1 else "LABEL_0"
+                st.session_state[f"{tab_name}_sentiment"] = (
+                    "LABEL_1" if sentiment == 1 else "LABEL_0"
+                )
                 st.session_state[f"{tab_name}_sentiment_message"] = (
                     f"{st.session_state[f'{tab_name}_sentiment']}: This text has a {'positive' if sentiment == 1 else 'negative'} sentiment."
                 )
@@ -744,7 +761,7 @@ def tab4():
     initialize_session_state(tab_name)
 
     # Initialize all potential variables at the function level
-    SA_model = SA_tokenizer = SA_sentiment_analysis =bert_model= None
+    SA_model = SA_tokenizer = SA_sentiment_analysis = bert_model = None
     SE_model = SE_query_embeddings = SE_queries_detailed = (
         SE_query_embeddings_detailed
     ) = None
@@ -771,15 +788,19 @@ def tab4():
     if submit_button:
         if text_input1:
             SA_model, SA_tokenizer, SA_sentiment_analysis, bert_model = load_sa_models()
-    
+
             truncated_text = truncate_text(text_input1, SA_tokenizer)
-            inputs = SA_tokenizer(truncated_text, return_tensors="pt", max_length=512, truncation=True)
+            inputs = SA_tokenizer(
+                truncated_text, return_tensors="pt", max_length=512, truncation=True
+            )
             inputs = inputs.to(device)
             result = bert_model(**inputs)
-    
+
             if result:
                 sentiment = torch.argmax(result.logits, dim=1).item()
-                st.session_state[f"{tab_name}_sentiment"] = "LABEL_1" if sentiment == 1 else "LABEL_0"
+                st.session_state[f"{tab_name}_sentiment"] = (
+                    "LABEL_1" if sentiment == 1 else "LABEL_0"
+                )
                 st.session_state[f"{tab_name}_sentiment_message"] = (
                     f"{st.session_state[f'{tab_name}_sentiment']}: This text has a {'positive' if sentiment == 1 else 'negative'} sentiment."
                 )
