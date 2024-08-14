@@ -76,7 +76,7 @@ def load_sa_models():
         bert_sentiment_model = joblib.load("models/bert_sentiment_model.joblib")
         bert_tokenizer = joblib.load("models/bert_tokenizer.joblib")
         sentiment_analysis_pipeline = joblib.load(
-            "models/sentiment_analysis_pipeline.joblib"
+            "models/bert_sentiment_analysis_pipeline.joblib"
         )
         bert_model = joblib.load("models/bert_sentiment_analysis_pipeline.joblib")
         return (
@@ -277,31 +277,39 @@ def tab1():
         if text_input1:
             SA_model, SA_tokenizer, SA_sentiment_analysis, bert_model = load_sa_models()
 
-            truncated_text = truncate_text(text_input1, SA_tokenizer)
-            inputs = SA_tokenizer(
-                truncated_text, return_tensors="pt", max_length=512, truncation=True
-            )
-            inputs = inputs.to(device)
-            result = bert_model(**inputs)
+            if bert_model and SA_tokenizer:
+                truncated_text = truncate_text(text_input1, SA_tokenizer)
+                inputs = SA_tokenizer(
+                    truncated_text, return_tensors="pt", max_length=512, truncation=True
+                )
+                inputs = inputs.to(device)
 
-            if result:
-                sentiment = torch.argmax(result.logits, dim=1).item()
-                st.session_state[f"{tab_name}_sentiment"] = (
-                    "LABEL_1" if sentiment == 1 else "LABEL_0"
-                )
-                st.session_state[f"{tab_name}_sentiment_message"] = (
-                    f"{st.session_state[f'{tab_name}_sentiment']}: This text has a {'positive' if sentiment == 1 else 'negative'} sentiment."
-                )
+                # Use the loaded sentiment analysis pipeline directly
+                result = SA_sentiment_analysis(truncated_text)
+
+                if result:
+                    sentiment = result[0]["label"]
+                    st.session_state[f"{tab_name}_sentiment"] = (
+                        "LABEL_1" if sentiment == "LABEL_1" else "LABEL_0"
+                    )
+                    st.session_state[f"{tab_name}_sentiment_message"] = (
+                        f"{st.session_state[f'{tab_name}_sentiment']}: This text has a {'positive' if sentiment == 'LABEL_1' else 'negative'} sentiment."
+                    )
+                else:
+                    st.session_state[f"{tab_name}_sentiment_message"] = (
+                        "Unable to determine sentiment. Please try again with different text."
+                    )
+                st.session_state[f"{tab_name}_sentiment_result_visible"] = True
             else:
                 st.session_state[f"{tab_name}_sentiment_message"] = (
-                    "Unable to determine sentiment. Please try again with a different text."
+                    "Sentiment analysis model not loaded properly."
                 )
-            st.session_state[f"{tab_name}_sentiment_result_visible"] = True
+                st.session_state[f"{tab_name}_sentiment_result_visible"] = True
         else:
             st.session_state[f"{tab_name}_sentiment_message"] = (
                 "Please enter some text before submitting."
             )
-            st.session_state[f"{tab_name}_sentiment_result_visible"] = True
+        st.session_state[f"{tab_name}_sentiment_result_visible"] = True
 
     if submit_button2:
         if text_input2:
@@ -404,6 +412,8 @@ def tab1():
         del SA_tokenizer
     if bert_model is not None:
         del bert_model
+    if SA_sentiment_analysis is not None:
+        del SA_sentiment_analysis
     if SE_model is not None:
         del SE_model
     if SE_query_embeddings is not None:
@@ -449,31 +459,39 @@ def tab2():
         if text_input1:
             SA_model, SA_tokenizer, SA_sentiment_analysis, bert_model = load_sa_models()
 
-            truncated_text = truncate_text(text_input1, SA_tokenizer)
-            inputs = SA_tokenizer(
-                truncated_text, return_tensors="pt", max_length=512, truncation=True
-            )
-            inputs = inputs.to(device)
-            result = bert_model(**inputs)
+            if bert_model and SA_tokenizer:
+                truncated_text = truncate_text(text_input1, SA_tokenizer)
+                inputs = SA_tokenizer(
+                    truncated_text, return_tensors="pt", max_length=512, truncation=True
+                )
+                inputs = inputs.to(device)
 
-            if result:
-                sentiment = torch.argmax(result.logits, dim=1).item()
-                st.session_state[f"{tab_name}_sentiment"] = (
-                    "LABEL_1" if sentiment == 1 else "LABEL_0"
-                )
-                st.session_state[f"{tab_name}_sentiment_message"] = (
-                    f"{st.session_state[f'{tab_name}_sentiment']}: This text has a {'positive' if sentiment == 1 else 'negative'} sentiment."
-                )
+                # Use the loaded sentiment analysis pipeline directly
+                result = SA_sentiment_analysis(truncated_text)
+
+                if result:
+                    sentiment = result[0]["label"]
+                    st.session_state[f"{tab_name}_sentiment"] = (
+                        "LABEL_1" if sentiment == "LABEL_1" else "LABEL_0"
+                    )
+                    st.session_state[f"{tab_name}_sentiment_message"] = (
+                        f"{st.session_state[f'{tab_name}_sentiment']}: This text has a {'positive' if sentiment == 'LABEL_1' else 'negative'} sentiment."
+                    )
+                else:
+                    st.session_state[f"{tab_name}_sentiment_message"] = (
+                        "Unable to determine sentiment. Please try again with different text."
+                    )
+                st.session_state[f"{tab_name}_sentiment_result_visible"] = True
             else:
                 st.session_state[f"{tab_name}_sentiment_message"] = (
-                    "Unable to determine sentiment. Please try again with a different text."
+                    "Sentiment analysis model not loaded properly."
                 )
-            st.session_state[f"{tab_name}_sentiment_result_visible"] = True
+                st.session_state[f"{tab_name}_sentiment_result_visible"] = True
         else:
             st.session_state[f"{tab_name}_sentiment_message"] = (
                 "Please enter some text before submitting."
             )
-            st.session_state[f"{tab_name}_sentiment_result_visible"] = True
+        st.session_state[f"{tab_name}_sentiment_result_visible"] = True
 
     if submit_button2:
         if text_input2:
@@ -572,6 +590,8 @@ def tab2():
         del SA_tokenizer
     if bert_model is not None:
         del bert_model
+    if SA_sentiment_analysis is not None:
+        del SA_sentiment_analysis
     if SE_model is not None:
         del SE_model
     if SE_query_embeddings is not None:
@@ -619,31 +639,39 @@ def tab3():
         if text_input1:
             SA_model, SA_tokenizer, SA_sentiment_analysis, bert_model = load_sa_models()
 
-            truncated_text = truncate_text(text_input1, SA_tokenizer)
-            inputs = SA_tokenizer(
-                truncated_text, return_tensors="pt", max_length=512, truncation=True
-            )
-            inputs = inputs.to(device)
-            result = bert_model(**inputs)
+            if bert_model and SA_tokenizer:
+                truncated_text = truncate_text(text_input1, SA_tokenizer)
+                inputs = SA_tokenizer(
+                    truncated_text, return_tensors="pt", max_length=512, truncation=True
+                )
+                inputs = inputs.to(device)
 
-            if result:
-                sentiment = torch.argmax(result.logits, dim=1).item()
-                st.session_state[f"{tab_name}_sentiment"] = (
-                    "LABEL_1" if sentiment == 1 else "LABEL_0"
-                )
-                st.session_state[f"{tab_name}_sentiment_message"] = (
-                    f"{st.session_state[f'{tab_name}_sentiment']}: This text has a {'positive' if sentiment == 1 else 'negative'} sentiment."
-                )
+                # Use the loaded sentiment analysis pipeline directly
+                result = SA_sentiment_analysis(truncated_text)
+
+                if result:
+                    sentiment = result[0]["label"]
+                    st.session_state[f"{tab_name}_sentiment"] = (
+                        "LABEL_1" if sentiment == "LABEL_1" else "LABEL_0"
+                    )
+                    st.session_state[f"{tab_name}_sentiment_message"] = (
+                        f"{st.session_state[f'{tab_name}_sentiment']}: This text has a {'positive' if sentiment == 'LABEL_1' else 'negative'} sentiment."
+                    )
+                else:
+                    st.session_state[f"{tab_name}_sentiment_message"] = (
+                        "Unable to determine sentiment. Please try again with different text."
+                    )
+                st.session_state[f"{tab_name}_sentiment_result_visible"] = True
             else:
                 st.session_state[f"{tab_name}_sentiment_message"] = (
-                    "Unable to determine sentiment. Please try again with a different text."
+                    "Sentiment analysis model not loaded properly."
                 )
-            st.session_state[f"{tab_name}_sentiment_result_visible"] = True
+                st.session_state[f"{tab_name}_sentiment_result_visible"] = True
         else:
             st.session_state[f"{tab_name}_sentiment_message"] = (
                 "Please enter some text before submitting."
             )
-            st.session_state[f"{tab_name}_sentiment_result_visible"] = True
+        st.session_state[f"{tab_name}_sentiment_result_visible"] = True
 
     if submit_button2:
         if text_input2:
@@ -742,6 +770,8 @@ def tab3():
         del SA_tokenizer
     if bert_model is not None:
         del bert_model
+    if SA_sentiment_analysis is not None:
+        del SA_sentiment_analysis
     if SE_model is not None:
         del SE_model
     if SE_query_embeddings is not None:
@@ -789,31 +819,39 @@ def tab4():
         if text_input1:
             SA_model, SA_tokenizer, SA_sentiment_analysis, bert_model = load_sa_models()
 
-            truncated_text = truncate_text(text_input1, SA_tokenizer)
-            inputs = SA_tokenizer(
-                truncated_text, return_tensors="pt", max_length=512, truncation=True
-            )
-            inputs = inputs.to(device)
-            result = bert_model(**inputs)
+            if bert_model and SA_tokenizer:
+                truncated_text = truncate_text(text_input1, SA_tokenizer)
+                inputs = SA_tokenizer(
+                    truncated_text, return_tensors="pt", max_length=512, truncation=True
+                )
+                inputs = inputs.to(device)
 
-            if result:
-                sentiment = torch.argmax(result.logits, dim=1).item()
-                st.session_state[f"{tab_name}_sentiment"] = (
-                    "LABEL_1" if sentiment == 1 else "LABEL_0"
-                )
-                st.session_state[f"{tab_name}_sentiment_message"] = (
-                    f"{st.session_state[f'{tab_name}_sentiment']}: This text has a {'positive' if sentiment == 1 else 'negative'} sentiment."
-                )
+                # Use the loaded sentiment analysis pipeline directly
+                result = SA_sentiment_analysis(truncated_text)
+
+                if result:
+                    sentiment = result[0]["label"]
+                    st.session_state[f"{tab_name}_sentiment"] = (
+                        "LABEL_1" if sentiment == "LABEL_1" else "LABEL_0"
+                    )
+                    st.session_state[f"{tab_name}_sentiment_message"] = (
+                        f"{st.session_state[f'{tab_name}_sentiment']}: This text has a {'positive' if sentiment == 'LABEL_1' else 'negative'} sentiment."
+                    )
+                else:
+                    st.session_state[f"{tab_name}_sentiment_message"] = (
+                        "Unable to determine sentiment. Please try again with different text."
+                    )
+                st.session_state[f"{tab_name}_sentiment_result_visible"] = True
             else:
                 st.session_state[f"{tab_name}_sentiment_message"] = (
-                    "Unable to determine sentiment. Please try again with a different text."
+                    "Sentiment analysis model not loaded properly."
                 )
-            st.session_state[f"{tab_name}_sentiment_result_visible"] = True
+                st.session_state[f"{tab_name}_sentiment_result_visible"] = True
         else:
             st.session_state[f"{tab_name}_sentiment_message"] = (
                 "Please enter some text before submitting."
             )
-            st.session_state[f"{tab_name}_sentiment_result_visible"] = True
+        st.session_state[f"{tab_name}_sentiment_result_visible"] = True
 
     if submit_button2:
         if text_input2:
@@ -912,6 +950,8 @@ def tab4():
         del SA_tokenizer
     if bert_model is not None:
         del bert_model
+    if SA_sentiment_analysis is not None:
+        del SA_sentiment_analysis
     if SE_model is not None:
         del SE_model
     if SE_query_embeddings is not None:
